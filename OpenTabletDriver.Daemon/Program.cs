@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using JKang.IpcServiceFramework.Hosting;
@@ -57,14 +56,14 @@ namespace OpenTabletDriver.Daemon
             {
                 AppInfo.Current.AppDataDirectory = appdata?.FullName;
                 AppInfo.Current.ConfigurationDirectory = config?.FullName;
-                hideWindow = hideWindow;
+                HideWindow = hideWindow;
             });
             rootCommand.Invoke(args);
 
             Daemon = new DriverDaemon();
-            if (hideWindow && PlatformInfo.IsWindows)
+            if (HideWindow && PlatformInfo.IsWindows)
             {
-                var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
+                var windowHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
                 NativeLib.Windows.Windows.ShowWindow(windowHandle, 0);
             }
             await CreateHostBuilder().Build().RunAsync();
@@ -86,6 +85,6 @@ namespace OpenTabletDriver.Daemon
 
         static DriverDaemon Daemon { set; get; }
         static bool Running { set; get; }
-        static bool hideWindow { set; get; }
+        static bool HideWindow { set; get; }
     }
 }
