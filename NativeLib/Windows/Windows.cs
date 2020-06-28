@@ -17,11 +17,14 @@ namespace NativeLib.Windows
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetCursorPos(out POINT lpPoint);
 
-        [DllImport(User32,CharSet=CharSet.Auto, CallingConvention=CallingConvention.StdCall)]
+        [DllImport(User32, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
         
         [DllImport(User32)]
         public static extern short GetKeyState(VirtualKeyStates nVirtKey);
+
+        [DllImport(User32)]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         #region Display
 

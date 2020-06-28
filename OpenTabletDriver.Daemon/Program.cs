@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
-using JKang.IpcServiceFramework.Hosting.NamedPipe;
 using JKang.IpcServiceFramework.Hosting;
+using JKang.IpcServiceFramework.Hosting.NamedPipe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NativeLib;
 using TabletDriverLib;
 using TabletDriverLib.Contracts;
 using TabletDriverPlugin;
-using System.CommandLine;
-using System.IO;
-using System.CommandLine.Invocation;
-using NativeLib;
 
 namespace OpenTabletDriver.Daemon
 {
@@ -47,24 +48,26 @@ namespace OpenTabletDriver.Daemon
                 {
                     Argument = new Argument<DirectoryInfo> ("config")
                 },
-                new Option(new string[] { "--service", "-s"}, "Run as a service")
+                new Option(new string[] { "--hide", "-h"}, "Hide the daemon window.")
                 {
-                    Argument = new Argument<bool>("runAsService")
+                    Argument = new Argument<bool>("hideWindow")
                 }
             };
-            rootCommand.Handler = CommandHandler.Create<DirectoryInfo, DirectoryInfo, bool>((appdata, config, runAsService) => 
+            rootCommand.Handler = CommandHandler.Create<DirectoryInfo, DirectoryInfo, bool>((appdata, config, hideWindow) => 
             {
                 AppInfo.Current.AppDataDirectory = appdata?.FullName;
                 AppInfo.Current.ConfigurationDirectory = config?.FullName;
-                RunAsService = runAsService;
+                hideWindow = hideWindow;
             });
             rootCommand.Invoke(args);
 
             Daemon = new DriverDaemon();
-            var hostBuilder = CreateHostBuilder();
-            if (RunAsService && PlatformInfo.IsWindows)
-                hostBuilder = hostBuilder.UseWindowsService();
-            await hostBuilder.Build().RunAsync();
+            if (hideWindow && PlatformInfo.IsWindows)
+            {
+                var windowHandle = Process.GetCurrentProcess().MainWindowHandle;
+                NativeLib.Windows.Windows.ShowWindow(windowHandle, 0);
+            }
+            await CreateHostBuilder().Build().RunAsync();
         }
 
         static IHostBuilder CreateHostBuilder() => 
@@ -83,6 +86,6 @@ namespace OpenTabletDriver.Daemon
 
         static DriverDaemon Daemon { set; get; }
         static bool Running { set; get; }
-        static bool RunAsService { set; get; }
+        static bool hideWindow { set; get; }
     }
 }
