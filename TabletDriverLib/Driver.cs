@@ -166,6 +166,12 @@ namespace TabletDriverLib
                 Log.Debug($"Setting feature: " + BitConverter.ToString(TabletProperties.FeatureInitReport));
                 TabletReader.ReportStream.SetFeature(TabletProperties.FeatureInitReport);
             }
+
+            if (TabletProperties.OutputInitReport != null && TabletProperties.OutputInitReport.Length > 0)
+            {
+                Log.Debug($"Setting output: " + BitConverter.ToString(TabletProperties.OutputInitReport));
+                TabletReader.ReportStream.Write(TabletProperties.OutputInitReport);
+            }
         }
 
         internal void InitializeAuxDevice(HidDevice auxDevice, IReportParser<IDeviceReport> reportParser)
